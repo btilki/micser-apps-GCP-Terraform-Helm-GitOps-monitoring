@@ -36,10 +36,11 @@ module "gke" {
   master_ipv4_cidr_block     = "172.16.0.0/28"
 
   master_authorized_networks = var.master_authorized_networks
+  node_metadata              = "GKE_METADATA"
 
-  gateway_api_channel              = "CHANNEL_STANDARD"
+  gateway_api_channel                  = "CHANNEL_STANDARD"
   monitoring_enable_managed_prometheus = true
-  logging_enabled_components         = ["SYSTEM_COMPONENTS", "WORKLOADS"]
+  logging_enabled_components           = ["SYSTEM_COMPONENTS", "WORKLOADS"]
 
   database_encryption = [{
     state    = "ENCRYPTED"
