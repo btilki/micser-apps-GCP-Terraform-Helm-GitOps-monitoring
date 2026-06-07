@@ -45,14 +45,14 @@ jobs:
       GCP_REGION: ${{ vars.GCP_REGION || 'europe-west1' }}
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
     steps:
-      - uses: actions/checkout@11bd71901b812cc519ae06cda381b8b47ca04d18
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - uses: google-github-actions/auth@6f9ef137b54a388b97894b986eabd2eea49e9c07
+      - uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f
         with:
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
           service_account: ${{ secrets.GCP_PROMOTE_SA }}
 
-      - uses: google-github-actions/setup-gcloud@77a7293e98e099e5d35dcca3030e940a5b33a83f
+      - uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a
 
       - name: Copy image between Artifact Registry repos
         run: |
@@ -71,7 +71,7 @@ jobs:
           sed -i "s|REGION-docker.pkg.dev/PROJECT_ID|${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}|g" "$file"
 
       - name: Open promotion PR
-        uses: peter-evans/create-pull-request@5e914681df9dc83aa4ab8d5af1b0114586f55f81
+        uses: peter-evans/create-pull-request@67ccf781d68cd99b580ae25a5c18a1cc84ffff1f
         with:
           branch: "promote/${{ inputs.service }}-${{ inputs.target_env }}-${{ github.run_id }}"
           title: "promote(${{ inputs.service }}): ${{ inputs.source_env }} → ${{ inputs.target_env }}"
