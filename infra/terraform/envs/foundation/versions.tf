@@ -9,7 +9,7 @@ terraform {
   }
 
   backend "gcs" {
-     bucket = "tfstate-msgb-bt-7-2026"
-     prefix = "foundation"
+    bucket = "tfstate-msgb-bt-7-2026"
+    prefix = "foundation"
   }
 }
