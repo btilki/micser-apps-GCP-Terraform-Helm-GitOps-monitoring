@@ -108,6 +108,59 @@ jobs:
         with:
           terraform_version: 1.9.8
 
+      # terraform.tfvars is gitignored locally; generate CI inputs from repo variables/secrets.
+      - name: Write CI Terraform variables
+        working-directory: infra/terraform/envs/${{ github.event.inputs.stack || 'foundation' }}
+        env:
+          PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION || 'europe-west1' }}
+          BUILD_CI_SA: ${{ secrets.GCP_BUILD_SA }}
+          PROMOTE_CI_SA: ${{ secrets.GCP_PROMOTE_SA }}
+          TFSTATE_BUCKET: ${{ vars.TFSTATE_BUCKET_NAME }}
+          DNS_ZONE: ${{ vars.DNS_ZONE_NAME || 'biroltilki-art' }}
+          DNS_DOMAIN: ${{ vars.DNS_DOMAIN || 'biroltilki.art.' }}
+          MASTER_AUTH_NETS: ${{ vars.GCP_MASTER_AUTHORIZED_NETWORKS_JSON || '[]' }}
+          GITHUB_ORG: ${{ github.repository_owner }}
+          GITHUB_REPO: ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          STACK="${{ github.event.inputs.stack || 'foundation' }}"
+
+          if [ -z "${PROJECT_ID}" ]; then
+            echo "::error::Repository variable GCP_PROJECT_ID is not set (Settings → Secrets and variables → Actions → Variables)."
+            exit 1
+          fi
+
+          if [ "$STACK" = "bootstrap" ]; then
+            BUCKET="${TFSTATE_BUCKET:-tfstate-${PROJECT_ID}}"
+            cat > ci.auto.tfvars.json <<EOF
+          {
+            "project_id": "${PROJECT_ID}",
+            "region": "${REGION}",
+            "tfstate_bucket_name": "${BUCKET}",
+            "github_org": "${GITHUB_ORG}",
+            "github_repo": "${GITHUB_REPO}"
+          }
+          EOF
+          else
+            BUILD_SA="${BUILD_CI_SA:-sa-build-ci@${PROJECT_ID}.iam.gserviceaccount.com}"
+            PROMOTE_SA="${PROMOTE_CI_SA:-sa-promote-ci@${PROJECT_ID}.iam.gserviceaccount.com}"
+            cat > ci.auto.tfvars.json <<EOF
+          {
+            "project_id": "${PROJECT_ID}",
+            "region": "${REGION}",
+            "build_ci_sa_email": "${BUILD_SA}",
+            "promote_ci_sa_email": "${PROMOTE_SA}",
+            "dns_zone_name": "${DNS_ZONE}",
+            "dns_domain": "${DNS_DOMAIN}",
+            "master_authorized_networks": ${MASTER_AUTH_NETS}
+          }
+          EOF
+          fi
+
+          echo "Generated ci.auto.tfvars.json for ${STACK}:"
+          jq 'del(.master_authorized_networks) | . + {master_authorized_networks: "<redacted>"}' ci.auto.tfvars.json
+
       - name: Terraform init/plan/apply
         working-directory: infra/terraform/envs/${{ github.event.inputs.stack || 'foundation' }}
         run: |
