@@ -2,7 +2,7 @@ replicaCount: 2
 env: dev
 
 image:
-  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-dev/cartservice
+  repository: europe-west1-docker.pkg.dev/msgb-bt-7-2026/boutique-dev/cartservice
   digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   pullPolicy: IfNotPresent
 

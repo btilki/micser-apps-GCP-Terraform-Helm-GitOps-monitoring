@@ -1,5 +1,5 @@
 env: dev
 
 image:
-  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-dev/redis-cart
+  repository: europe-west1-docker.pkg.dev/msgb-bt-7-2026/boutique-dev/redis-cart
   digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"

@@ -17,4 +17,4 @@ spec:
         pattern:
           spec:
             containers:
-              - image: "REGION-docker.pkg.dev/PROJECT_ID/*"
+              - image: "europe-west1-docker.pkg.dev/msgb-bt-7-2026/*"

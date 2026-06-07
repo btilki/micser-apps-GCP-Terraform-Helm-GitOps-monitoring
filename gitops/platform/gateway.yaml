@@ -14,7 +14,7 @@ spec:
     - name: https
       protocol: HTTPS
       port: 443
-      hostname: "*.boutique.example.com"
+      hostname: "*.biroltilki.art"
       allowedRoutes:
         namespaces:
           from: All

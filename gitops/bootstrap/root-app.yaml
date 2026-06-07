@@ -6,7 +6,7 @@ metadata:
 spec:
   project: boutique-platform
   source:
-    repoURL: https://github.com/ORG/Microservices-Google.git
+    repoURL: https://github.com/btilki/micser-apps-GCP-Terraform-Helm-GitOps-monitoring.git
     targetRevision: main
     path: gitops/bootstrap/applications
   destination:

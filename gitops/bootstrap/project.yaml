@@ -6,7 +6,7 @@ metadata:
 spec:
   description: Online Boutique platform and workloads on GKE
   sourceRepos:
-    - https://github.com/ORG/Microservices-Google.git
+    - https://github.com/btilki/micser-apps-GCP-Terraform-Helm-GitOps-monitoring.git
   destinations:
     - namespace: dev
       server: https://kubernetes.default.svc

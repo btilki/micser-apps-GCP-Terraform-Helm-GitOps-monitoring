@@ -3,7 +3,7 @@ replicaCount: 2
 env: dev
 
 image:
-  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-dev/frontend
+  repository: europe-west1-docker.pkg.dev/PROJECT_ID/boutique-dev/frontend
   digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   pullPolicy: IfNotPresent
 
@@ -18,7 +18,7 @@ service:
 
 gateway:
   enabled: true
-  host: dev.boutique.example.com
+  host: dev.biroltilki.art
   gatewayName: boutique-gateway
   gatewayNamespace: platform
 
