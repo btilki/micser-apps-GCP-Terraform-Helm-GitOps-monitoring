@@ -13,6 +13,10 @@ resource "google_kms_crypto_key" "key" {
   key_ring = google_kms_key_ring.ring.id
 
   rotation_period = "7776000s"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 output "crypto_key_id" {

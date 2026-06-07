@@ -1,0 +1,11 @@
+# Accepted tradeoffs for this homelab/cost-first platform scaffold.
+# See SECURITY.md — prod hardening can enable DNSSEC, flow logs, CSEK, etc.
+skip-check:
+  - CKV_GCP_62   # tfstate bucket access logging (needs separate log bucket)
+  - CKV_GCP_117  # terraform CI uses roles/editor by design in bootstrap
+  - CKV_GCP_49   # editor role includes SA management — accepted for sa-terraform-ci
+  - CKV_GCP_84   # Artifact Registry CSEK — Google-managed keys are sufficient here
+  - CKV_GCP_16   # DNSSEC optional until registrar supports DS records
+  - CKV_TF_1     # Registry module version pin (~> 35.0) is standard practice
+  - CKV_GCP_26   # VPC flow logs disabled for cost (see SECURITY.md)
+  - CKV2_GCP_18  # Custom firewall rules added at platform layer, not in foundation VPC
