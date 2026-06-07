@@ -1,0 +1,122 @@
+name: Reusable Service CI
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+    secrets:
+      GCP_WIF_PROVIDER:
+        required: true
+      GCP_BUILD_SA:
+        required: true
+      COSIGN_PRIVATE_KEY:
+        required: false
+      COSIGN_PASSWORD:
+        required: false
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  build-scan-push:
+    runs-on: ubuntu-latest
+    environment: build
+    env:
+      SERVICE: ${{ inputs.service }}
+      GCP_REGION: ${{ vars.GCP_REGION || 'europe-west1' }}
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      AR_REPO: boutique-dev
+    steps:
+      - uses: actions/checkout@11bd71901b812cc519ae06cda381b8b47ca04d18 # v4.2.2
+
+      - name: Resolve build context
+        id: meta
+        run: |
+          dockerfile=$(jq -r ".[\"${SERVICE}\"].dockerfile" scripts/services.json)
+          context=$(jq -r ".[\"${SERVICE}\"].context" scripts/services.json)
+          echo "dockerfile=${dockerfile}" >> "$GITHUB_OUTPUT"
+          echo "context=${context}" >> "$GITHUB_OUTPUT"
+          echo "image=${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${AR_REPO}/${SERVICE}" >> "$GITHUB_OUTPUT"
+
+      - uses: google-github-actions/auth@6f9ef137b54a388b97894b986eabd2eea49e9c07 # v2.1.7
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_BUILD_SA }}
+
+      - uses: google-github-actions/setup-gcloud@77a7293e98e099e5d35dcca3030e940a5b33a83f # v2.1.4
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
+
+      - name: Build image
+        run: |
+          docker build \
+            -f "${{ steps.meta.outputs.dockerfile }}" \
+            -t "${{ steps.meta.outputs.image }}:${GITHUB_SHA}" \
+            "${{ steps.meta.outputs.context }}"
+
+      - name: Generate SBOM (syft)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          syft "${{ steps.meta.outputs.image }}:${GITHUB_SHA}" -o cyclonedx-json > "sbom-${SERVICE}.json"
+        continue-on-error: true
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@b1317931f0c889034b1d090d9319e008d6ae71a2 # v4.4.0
+        with:
+          name: sbom-${{ inputs.service }}
+          path: sbom-${{ inputs.service }}.json
+        if: always()
+
+      - name: Trivy scan
+        uses: aquasecurity/trivy-action@6f1794ce0900773124cb2de2b8d4c37aba8e5d2b # 0.28.0
+        with:
+          image-ref: "${{ steps.meta.outputs.image }}:${GITHUB_SHA}"
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+      - name: Push image
+        id: push
+        run: |
+          docker push "${{ steps.meta.outputs.image }}:${GITHUB_SHA}"
+          digest=$(gcloud artifacts docker images describe \
+            "${{ steps.meta.outputs.image }}:${GITHUB_SHA}" \
+            --format='value(image_summary.digest)')
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+      - uses: sigstore/cosign-installer@d686acbb63d6dd3787e01dbf876b3bda088459d8 # v3.7.0
+
+      - name: Sign image
+        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' }}
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: cosign sign --yes "${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}"
+
+      - name: Create Binary Authorization attestation
+        run: |
+          gcloud beta container binauthz attestations sign-and-create \
+            --artifact-url="${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}" \
+            --attestor="boutique-cosign" \
+            --project="${GCP_PROJECT_ID}" || true
+
+      - name: Patch dev GitOps values
+        run: |
+          file="gitops/envs/dev/values-${{ inputs.service }}.yaml"
+          sed -i "s|digest:.*|digest: \"${{ steps.push.outputs.digest }}\"|" "$file"
+          sed -i "s|REGION-docker.pkg.dev/PROJECT_ID|${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}|g" "$file"
+
+      - name: Open GitOps PR
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4ab8d5af1b0114586f55f81 # v7
+        with:
+          branch: "ci/${{ inputs.service }}-${{ github.sha }}"
+          title: "ci(${{ inputs.service }}): deploy digest to dev"
+          commit-message: "ci(${{ inputs.service }}): update dev digest"
+          body: |
+            Automated CI update for `${{ inputs.service }}`.
+            Digest: `${{ steps.push.outputs.digest }}`

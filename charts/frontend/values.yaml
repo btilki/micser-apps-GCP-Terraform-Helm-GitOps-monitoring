@@ -1,0 +1,62 @@
+replicaCount: 2
+
+env: dev
+
+image:
+  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-dev/frontend
+  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+  gcpServiceAccount: ""
+
+service:
+  port: 80
+  targetPort: 8080
+
+gateway:
+  enabled: true
+  host: dev.boutique.example.com
+  gatewayName: boutique-gateway
+  gatewayNamespace: platform
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /_healthz
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /_healthz
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# gRPC upstreams (namespace-local DNS)
+envVars:
+  PRODUCT_CATALOG_SERVICE_ADDR: productcatalogservice:3550
+  CURRENCY_SERVICE_ADDR: currencyservice:7000
+  CART_SERVICE_ADDR: cartservice:7070
+  ENV_PLATFORM: gcp

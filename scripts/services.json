@@ -1,0 +1,37 @@
+{
+  "frontend": {
+    "dockerfile": "apps/frontend/Dockerfile",
+    "context": "apps/frontend",
+    "chart": "charts/frontend",
+    "port": 8080,
+    "public": true
+  },
+  "cartservice": {
+    "dockerfile": "apps/cartservice/src/Dockerfile",
+    "context": "apps/cartservice/src",
+    "chart": "charts/cartservice",
+    "port": 7070,
+    "public": false
+  },
+  "currencyservice": {
+    "dockerfile": "apps/currencyservice/Dockerfile",
+    "context": "apps/currencyservice",
+    "chart": "charts/currencyservice",
+    "port": 7000,
+    "public": false
+  },
+  "productcatalogservice": {
+    "dockerfile": "apps/productcatalogservice/Dockerfile",
+    "context": "apps/productcatalogservice",
+    "chart": "charts/productcatalogservice",
+    "port": 3550,
+    "public": false
+  },
+  "redis-cart": {
+    "dockerfile": "apps/redis-cart/Dockerfile",
+    "context": "apps/redis-cart",
+    "chart": "charts/redis-cart",
+    "port": 6379,
+    "public": false
+  }
+}

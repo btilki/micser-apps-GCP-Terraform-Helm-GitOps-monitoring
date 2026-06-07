@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: boutique-platform
+  namespace: argocd
+spec:
+  description: Online Boutique platform and workloads on GKE
+  sourceRepos:
+    - https://github.com/ORG/Microservices-Google.git
+  destinations:
+    - namespace: dev
+      server: https://kubernetes.default.svc
+    - namespace: stage
+      server: https://kubernetes.default.svc
+    - namespace: prod
+      server: https://kubernetes.default.svc
+    - namespace: platform
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+    - group: gateway.networking.k8s.io
+      kind: GatewayClass
+    - group: kyverno.io
+      kind: ClusterPolicy
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

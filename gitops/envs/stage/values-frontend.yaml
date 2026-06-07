@@ -1,0 +1,8 @@
+env: stage
+
+image:
+  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-stage/frontend
+  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+gateway:
+  host: stage.boutique.example.com

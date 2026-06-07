@@ -1,0 +1,12 @@
+project_id = "your-gcp-project-id"
+region     = "europe-west1"
+
+build_ci_sa_email   = "sa-build-ci@your-gcp-project-id.iam.gserviceaccount.com"
+promote_ci_sa_email = "sa-promote-ci@your-gcp-project-id.iam.gserviceaccount.com"
+
+dns_zone_name = "biroltilki-art"
+dns_domain    = "biroltilki.art."
+
+# master_authorized_networks = [
+#   { cidr_block = "203.0.113.10/32", display_name = "home" }
+# ]

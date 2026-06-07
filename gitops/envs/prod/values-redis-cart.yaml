@@ -1,0 +1,5 @@
+env: prod
+
+image:
+  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-prod/redis-cart
+  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"

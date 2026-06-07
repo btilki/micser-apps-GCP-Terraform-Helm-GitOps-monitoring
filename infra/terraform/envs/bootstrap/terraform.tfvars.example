@@ -1,0 +1,7 @@
+project_id          = "your-gcp-project-id"
+region              = "europe-west1"
+tfstate_bucket_name = "tfstate-microservices-google-UNIQUE"
+github_org          = "your-github-org"
+github_repo         = "Microservices-Google"
+# billing_account_id  = "XXXXXX-XXXXXX-XXXXXX"
+# monthly_budget_usd  = 250

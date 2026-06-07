@@ -1,0 +1,7 @@
+env: prod
+
+image:
+  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-prod/cartservice
+  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+replicaCount: 3

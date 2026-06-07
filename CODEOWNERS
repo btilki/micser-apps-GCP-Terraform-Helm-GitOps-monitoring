@@ -1,0 +1,5 @@
+# Prod GitOps changes require explicit review
+/gitops/envs/prod/                    @platform-owners
+/gitops/applicationsets/              @platform-owners
+/policies/kyverno/                    @platform-owners
+/infra/terraform/envs/foundation/     @platform-owners

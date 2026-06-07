@@ -1,0 +1,117 @@
+name: Terraform
+
+on:
+  pull_request:
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/terraform.yml"
+  push:
+    branches: [main]
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/terraform.yml"
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: "bootstrap or foundation"
+        required: true
+        default: foundation
+        type: choice
+        options:
+          - bootstrap
+          - foundation
+      action:
+        description: "plan or apply"
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - apply
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+env:
+  TF_IN_AUTOMATION: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901b812cc519ae06cda381b8b47ca04d18 # v4.2.2
+
+      - uses: hashicorp/setup-terraform@b9cd54cbfe567309551f1d933f94ef11f40420bf # v3.1.2
+        with:
+          terraform_version: 1.9.8
+
+      - name: Terraform fmt and validate (bootstrap)
+        run: |
+          terraform -chdir=infra/terraform/envs/bootstrap init -backend=false
+          terraform -chdir=infra/terraform/envs/bootstrap fmt -check -recursive
+          terraform -chdir=infra/terraform/envs/bootstrap validate
+
+      - name: Terraform fmt and validate (foundation)
+        run: |
+          terraform -chdir=infra/terraform/envs/foundation init -backend=false
+          terraform -chdir=infra/terraform/envs/foundation fmt -check -recursive
+          terraform -chdir=infra/terraform/envs/foundation validate
+
+      - name: Helm lint
+        uses: azure/setup-helm@5115f3703e9f6bead16e456cdc543a0341a0d1be # v4.2.0
+      - run: make helm-lint
+
+  security:
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901b812cc519ae06cda381b8b47ca04d18
+
+      - name: tfsec
+        uses: aquasecurity/tfsec-action@0398e2b1a8e751a5d0fe1174ab22c808eade2a55 # v1.0.0
+        with:
+          working_directory: infra/terraform
+
+      - name: Checkov
+        run: |
+          pip install checkov==3.2.346
+          checkov -d infra/terraform --framework terraform --quiet
+
+      - name: Trivy config scan
+        uses: aquasecurity/trivy-action@6f1794ce0900773124cb2de2b8d4c37aba8e5d2b # 0.28.0
+        with:
+          scan-type: config
+          scan-ref: infra/terraform
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+  plan-apply:
+    if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && github.event_name == 'push')
+    needs: [validate]
+    runs-on: ubuntu-latest
+    environment: terraform
+    steps:
+      - uses: actions/checkout@11bd71901b812cc519ae06cda381b8b47ca04d18
+
+      - uses: google-github-actions/auth@6f9ef137b54a388b97894b986eabd2eea49e9c07 # v2.1.7
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_TERRAFORM_SA }}
+
+      - uses: google-github-actions/setup-gcloud@77a7293e98e099e5d35dcca3030e940a5b33a83f # v2.1.4
+
+      - uses: hashicorp/setup-terraform@b9cd54cbfe567309551f1d933f94ef11f40420bf
+        with:
+          terraform_version: 1.9.8
+
+      - name: Terraform init/plan/apply
+        working-directory: infra/terraform/envs/${{ github.event.inputs.stack || 'foundation' }}
+        run: |
+          terraform init -input=false
+          if [ "${{ github.event.inputs.action || 'plan' }}" = "apply" ]; then
+            terraform apply -input=false -auto-approve
+          else
+            terraform plan -input=false
+          fi

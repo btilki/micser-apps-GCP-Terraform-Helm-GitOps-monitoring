@@ -1,0 +1,18 @@
+name: CI frontend
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/frontend/**"
+      - "charts/frontend/**"
+      - ".github/workflows/reusable-service-ci.yml"
+      - ".github/workflows/ci-frontend.yml"
+
+jobs:
+  ci:
+    uses: ./.github/workflows/reusable-service-ci.yml
+    with:
+      service: frontend
+    secrets: inherit

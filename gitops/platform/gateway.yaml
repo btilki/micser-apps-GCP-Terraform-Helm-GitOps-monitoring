@@ -1,0 +1,26 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: boutique-gateway
+  namespace: platform
+  annotations:
+    networking.gke.io/certmap: boutique-cert-map
+spec:
+  gatewayClassName: gke-l7-global-external-managed
+  addresses:
+    - type: NamedAddress
+      value: boutique-gateway-ip
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.boutique.example.com"
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All

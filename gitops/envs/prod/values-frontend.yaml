@@ -1,0 +1,10 @@
+env: prod
+
+image:
+  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-prod/frontend
+  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+gateway:
+  host: boutique.example.com
+
+replicaCount: 3

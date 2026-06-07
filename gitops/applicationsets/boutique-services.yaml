@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: boutique-services
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - env: dev
+                  autoSync: "true"
+                - env: stage
+                  autoSync: "true"
+                - env: prod
+                  autoSync: "false"
+          - list:
+              elements:
+                - service: frontend
+                  chart: charts/frontend
+                - service: cartservice
+                  chart: charts/cartservice
+                - service: currencyservice
+                  chart: charts/currencyservice
+                - service: productcatalogservice
+                  chart: charts/productcatalogservice
+                - service: redis-cart
+                  chart: charts/redis-cart
+  template:
+    metadata:
+      name: "{{service}}-{{env}}"
+    spec:
+      project: boutique-platform
+      source:
+        repoURL: https://github.com/ORG/Microservices-Google.git
+        targetRevision: main
+        path: "{{chart}}"
+        helm:
+          releaseName: "{{service}}"
+          valueFiles:
+            - ../../gitops/envs/{{env}}/values-{{service}}.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{env}}"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+  templatePatch: |
+    spec:
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        {{- if eq .autoSync "true" }}
+        automated:
+          prune: true
+          selfHeal: true
+        {{- end }}

@@ -1,0 +1,5 @@
+env: dev
+
+image:
+  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-dev/productcatalogservice
+  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
