@@ -96,9 +96,9 @@ resource "google_storage_bucket_iam_member" "terraform_ci_state" {
 }
 
 resource "google_billing_budget" "platform" {
-  count            = var.billing_account_id != "" && var.monthly_budget_usd > 0 ? 1 : 0
-  billing_account  = var.billing_account_id
-  display_name     = "${local.name_prefix}-monthly-budget"
+  count           = var.billing_account_id != "" && var.monthly_budget_usd > 0 ? 1 : 0
+  billing_account = var.billing_account_id
+  display_name    = "${local.name_prefix}-monthly-budget"
 
   budget_filter {
     projects = ["projects/${var.project_id}"]
