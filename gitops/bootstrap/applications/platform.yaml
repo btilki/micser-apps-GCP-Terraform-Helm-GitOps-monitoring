@@ -13,7 +13,6 @@ spec:
     path: gitops/platform
   destination:
     server: https://kubernetes.default.svc
-    namespace: platform
   syncPolicy:
     automated:
       prune: true
