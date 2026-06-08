@@ -49,6 +49,12 @@ resource "google_kms_crypto_key_iam_member" "gke_etcd_encryption" {
   member        = "serviceAccount:service-${data.google_project.current.number}@container-engine-robot.iam.gserviceaccount.com"
 }
 
+resource "google_project_iam_member" "gke_nodes_artifact_registry_reader" {
+  project = var.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:${module.gke.service_account}"
+}
+
 module "dns" {
   source = "../../modules/dns"
 

@@ -2,4 +2,4 @@ env: dev
 
 image:
   repository: europe-west1-docker.pkg.dev/msgb-bt-7-2026/boutique-dev/cartservice
-  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  digest: "sha256:5c6050d4dc5cb95fad4b6d86cabeab0456a28403dfdc15760dbebe911488aad0"

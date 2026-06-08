@@ -64,3 +64,8 @@ output "cluster_endpoint" {
   value     = module.gke.endpoint
   sensitive = true
 }
+
+output "service_account" {
+  description = "GKE node pool service account (needs Artifact Registry reader to pull images)"
+  value       = module.gke.service_account
+}
