@@ -126,3 +126,8 @@ Repeat for other services when ready (`CI cartservice`, etc.).
 | Trivy blocks build | Fix CVEs in base image or Dockerfile; or temporarily adjust severity while learning |
 | No PR created / `not permitted to create or approve pull requests` | Enable [§3.4](#34-enable-pr-creation-from-actions-one-time); workflows already set `contents: write` and `pull-requests: write` |
 | `docker build` timeout | .NET/Go builds can be slow on free runners — re-run or use larger runner |
+
+---
+
+**Previous:** [phase-02-github-setup.md](phase-02-github-setup.md)  
+**Next:** [phase-04-argocd-and-platform.md](phase-04-argocd-and-platform.md)
