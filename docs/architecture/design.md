@@ -34,7 +34,7 @@
 
 ## ADR-007: ApplicationSet GitOps
 
-**Decision:** Single ApplicationSet matrix (env × service) with templatePatch for prod manual sync.
+**Decision:** Two ApplicationSets (autosync for dev/stage, manual for prod) generated from env × service matrix.
 
 ## ADR-008: Real application source
 

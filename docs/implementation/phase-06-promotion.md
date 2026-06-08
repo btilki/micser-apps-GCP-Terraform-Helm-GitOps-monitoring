@@ -83,4 +83,4 @@ Document known-good digests in your ops notes for rehearsed rollback.
 |---------|-----|
 | `gcloud artifacts docker images copy` denied | `sa-promote-ci` IAM on source (reader) and target (writer) repos |
 | Prod pod blocked by Binary Authorization | Image needs attestation from CI; check attestor name `boutique-cosign` |
-| Prod sync automatic when it shouldn't | Check ApplicationSet `templatePatch` for `autoSync: "false"` on prod |
+| Prod sync automatic when it shouldn't | Confirm app is from `boutique-services-prod` (no automated syncPolicy) |

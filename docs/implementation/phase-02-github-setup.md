@@ -44,7 +44,7 @@ Argo CD and Kyverno need real values before cluster sync.
 | Path | What to fix |
 |------|-------------|
 | `gitops/bootstrap/**/*.yaml` | `repoURL: https://github.com/ORG/...` |
-| `gitops/applicationsets/boutique-services.yaml` | `repoURL` |
+| `gitops/applicationsets/boutique-services-*.yaml` | `repoURL` |
 | `gitops/envs/**/values-*.yaml` | `image.repository` AR URLs |
 | `policies/kyverno/restrict-image-registries.yaml` | registry pattern |
 | `gitops/platform/gateway.yaml` | hostnames, cert map |

@@ -217,7 +217,7 @@ Until Kyverno is installed, policy Applications may show **OutOfSync** — expec
 
 ## 4.8 Prod sync behavior
 
-The ApplicationSet uses `templatePatch` so **prod** apps do **not** auto-sync. In Argo UI, prod applications require **manual Sync** after promotion (Phase 6).
+**Prod** apps use `boutique-services-prod` (no auto-sync). In Argo UI, prod applications require **manual Sync** after promotion (Phase 6).
 
 ---
 

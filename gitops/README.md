@@ -8,4 +8,4 @@
 | `platform/` | Namespaces, Gateway, NetworkPolicies |
 | `../platform/manifests/` | One-off manifests (e.g. Argo CD HTTPRoute) — apply manually |
 
-Prod apps sync **manually** — ApplicationSet `templatePatch` disables automation for `prod`.
+Prod apps sync **manually** — `boutique-services-prod` ApplicationSet has no automated syncPolicy.
