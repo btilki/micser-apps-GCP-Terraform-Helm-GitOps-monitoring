@@ -15,4 +15,8 @@ jobs:
     uses: ./.github/workflows/reusable-service-ci.yml
     with:
       service: frontend
-    secrets: inherit
+    secrets:
+      GCP_WIF_PROVIDER: ${{ secrets.GCP_WIF_PROVIDER }}
+      GCP_BUILD_SA: ${{ secrets.GCP_BUILD_SA }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
