@@ -113,4 +113,4 @@ Phase 6 — Promotion
 | Repo name | `Microservices-Google` | bootstrap `github_repo` |
 | Google Cloud Storage (GCS) state bucket | `tfstate-boutique-unique-2026` | bootstrap backend (globally unique) |
 | Domain (optional) | `biroltilki.art` | Cloud DNS zone, Gateway, frontend host |
-| Your public IP | from `curl -s ifconfig.me` | GKE `master_authorized_networks` |
+| Your public IPv4 | from `curl -4 ifconfig.me` | GKE `master_authorized_networks` (add multiple `/32` if IP rotates) |

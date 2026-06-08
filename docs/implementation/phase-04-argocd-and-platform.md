@@ -13,6 +13,8 @@ Install Argo CD and sync platform resources (namespaces, Gateway, NetworkPolicie
 - Phase 2: `ORG` / `PROJECT_ID` / `REGION` replaced in GitOps manifests
 - Phase 3: At least one GitOps values file merged (recommended: `frontend` dev digest)
 
+If `kubectl` fails with `dial tcp …:443: i/o timeout`, your public IP is not in GKE `master_authorized_networks`. Check with `curl -4 ifconfig.me`, add the `/32` to `infra/terraform/envs/foundation/terraform.tfvars`, run `terraform apply`, then `make kubeconfig` (see [phase-01 §Common issues](phase-01-gcp-and-terraform.md#common-issues)).
+
 ---
 
 ## 4.2 Install Argo CD (one time)
@@ -123,6 +125,7 @@ The ApplicationSet uses `templatePatch` so **prod** apps do **not** auto-sync. I
 
 | Problem | Fix |
 |---------|-----|
+| `kubectl` connection timeout | `curl -4 ifconfig.me` → add `/32` to `master_authorized_networks`, `terraform apply`, `make kubeconfig` |
 | Application **Unknown** revision | Wrong `repoURL` or private repo not registered |
 | ImagePullBackOff | Image not in AR yet — run CI (Phase 3) |
 | Gateway no address | GKE Gateway controller may need a few minutes; check GKE Gateway add-on |

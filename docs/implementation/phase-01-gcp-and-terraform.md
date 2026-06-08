@@ -149,17 +149,20 @@ dns_domain    = "biroltilki.art."  # your domain — trailing dot required
 
 App hostnames used later in GitOps (Phase 2): `dev.biroltilki.art`, `stage.biroltilki.art`, `biroltilki.art` (prod).
 
-**Recommended:** restrict GKE control plane to your IP:
+**Recommended:** restrict GKE control plane to your IP (or a small list if your ISP rotates addresses):
 
 ```bash
-curl -s ifconfig.me   # note your public IP
+curl -4 ifconfig.me   # use -4 for IPv4; GKE authorized networks expect CIDR blocks
 ```
 
 ```hcl
 master_authorized_networks = [
-  { cidr_block = "YOUR.PUBLIC.IP/32", display_name = "home" }
+  { cidr_block = "YOUR.PUBLIC.IP/32", display_name = "home-current" },
+  { cidr_block = "YOUR.OLD.PUBLIC.IP/32", display_name = "home-old" },
 ]
 ```
+
+If `kubectl` later times out with `dial tcp …:443: i/o timeout`, your public IP likely changed — add the new `/32` and run `terraform apply` again (see [Common issues](#common-issues)).
 
 ```bash
 terraform init
@@ -271,5 +274,5 @@ make kubeconfig GCP_REGION=your-region
 |---------|-----|
 | `terraform apply` API not enabled | Re-run `gcloud services enable` from §1.3 |
 | GKE create fails | Check billing, quotas, and `master_authorized_networks` includes your IP |
-| `kubectl` connection timeout | Your IP changed or is not in `master_authorized_networks` |
+| `kubectl` connection timeout | Run `curl -4 ifconfig.me`; add that `/32` to `master_authorized_networks` in `terraform.tfvars`, then `terraform apply`. Keep old IPs in the list if your ISP rotates addresses. |
 | Bucket name taken | Choose another globally unique `tfstate_bucket_name` |
