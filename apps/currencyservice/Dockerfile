@@ -40,6 +40,10 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 
 COPY . .
 
+RUN addgroup -g 1000 -S app && adduser -u 1000 -S -G app app \
+    && chown -R app:app /usr/src/app
+USER 1000
+
 EXPOSE 7000
 
 ENTRYPOINT [ "node", "server.js" ]

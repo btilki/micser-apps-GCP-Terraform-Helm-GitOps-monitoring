@@ -3,3 +3,11 @@ env: dev
 image:
   repository: europe-west1-docker.pkg.dev/msgb-bt-7-2026/boutique-dev/redis-cart
   digest: "sha256:315bc7428c1ebace3ed8620f81b38088721b8ef94bb6e010658f9d8c347fd4d3"
+
+containerSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
