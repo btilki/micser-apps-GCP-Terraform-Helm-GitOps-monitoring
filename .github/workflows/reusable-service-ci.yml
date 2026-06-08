@@ -85,8 +85,6 @@ jobs:
             --format='value(image_summary.digest)')
           echo "digest=${digest}" >> "$GITHUB_OUTPUT"
 
-      - uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
-
       - name: Sign image
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
@@ -96,6 +94,9 @@ jobs:
             echo "COSIGN_PRIVATE_KEY not set - skipping image signing"
             exit 0
           fi
+          curl -fsSL -o /usr/local/bin/cosign \
+            https://github.com/sigstore/cosign/releases/download/v2.4.3/cosign-linux-amd64
+          chmod +x /usr/local/bin/cosign
           cosign sign --yes "${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}"
 
       - name: Create Binary Authorization attestation
