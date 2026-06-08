@@ -53,10 +53,10 @@ kubectl logs -n dev deploy/frontend --tail=50
 
 ## 5.4 DNS and HTTPS
 
-When DNS A record for `dev.boutique.example.com` points to `gateway_ip`:
+When DNS A record for `dev.biroltilki.art` points to `gateway_ip`:
 
 ```bash
-bash scripts/smoke.sh https://dev.boutique.example.com
+bash scripts/smoke.sh https://dev.biroltilki.art
 ```
 
 Without DNS, port-forward for a quick check:

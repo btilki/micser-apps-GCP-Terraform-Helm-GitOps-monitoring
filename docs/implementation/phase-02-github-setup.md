@@ -37,6 +37,8 @@ Argo CD and Kyverno need real values before cluster sync.
 | `REGION` | GCP region | `europe-west1` |
 | `boutique.example.com` | Your domain (if any) | `biroltilki.art` |
 
+**Hostnames:** `argocd.biroltilki.art` (Argo CD), `dev.biroltilki.art`, `stage.biroltilki.art`, `biroltilki.art` (prod).
+
 **Files to update:**
 
 | Path | What to fix |

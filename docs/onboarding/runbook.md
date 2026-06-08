@@ -33,6 +33,8 @@ dns_domain    = "biroltilki.art."
 
 After `terraform apply`: `terraform output dns_name_servers` → set those four NS records at your domain registrar. Full steps: [phase-01 §1.7](../implementation/phase-01-gcp-and-terraform.md#17-create-the-cloud-dns-zone-and-delegate-your-domain).
 
+**App DNS (after Gateway live):** A records for `argocd`, `dev`, `stage`, and `@` → `gateway_ip`. Argo CD UI: **https://argocd.biroltilki.art** ([phase-04 §4.3](../implementation/phase-04-argocd-and-platform.md#43-expose-argo-cd-ui-at-httpsargocdbiroltilkiart)).
+
 ## One-page secret reference
 
 | GitHub name | Type | From |

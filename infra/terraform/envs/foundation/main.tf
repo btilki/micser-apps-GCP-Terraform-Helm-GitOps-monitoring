@@ -57,6 +57,15 @@ module "dns" {
   dns_name   = var.dns_domain
 }
 
+module "certificate_manager" {
+  source = "../../modules/certificate_manager"
+
+  project_id    = var.project_id
+  dns_zone_name = module.dns.zone_name
+  domain        = trimsuffix(var.dns_domain, ".")
+  cert_map_name = var.cert_map_name
+}
+
 resource "google_compute_global_address" "gateway" {
   name         = "${local.name_prefix}-gateway-ip"
   address_type = "EXTERNAL"

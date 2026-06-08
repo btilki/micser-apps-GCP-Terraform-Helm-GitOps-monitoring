@@ -34,3 +34,8 @@ output "artifact_registry_urls" {
 output "binary_auth_attestor" {
   value = module.binary_auth.attestor_id
 }
+
+output "cert_map_name" {
+  description = "Certificate Manager map wired to Gateway annotation networking.gke.io/certmap"
+  value       = module.certificate_manager.cert_map_name
+}

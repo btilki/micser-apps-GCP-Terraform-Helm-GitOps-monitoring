@@ -22,6 +22,12 @@ variable "dns_domain" {
   default = "boutique.example.com."
 }
 
+variable "cert_map_name" {
+  description = "Certificate Manager map name; must match gitops/platform/gateway.yaml networking.gke.io/certmap"
+  type        = string
+  default     = "boutique-cert-map"
+}
+
 variable "build_ci_sa_email" {
   description = "From bootstrap output"
   type        = string

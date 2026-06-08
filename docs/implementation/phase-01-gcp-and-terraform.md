@@ -58,6 +58,7 @@ gcloud services enable \
   serviceusage.googleapis.com \
   logging.googleapis.com \
   monitoring.googleapis.com \
+  certificatemanager.googleapis.com \
   --project=YOUR_PROJECT_ID
 ```
 
@@ -121,7 +122,7 @@ Repeat for foundation after Phase 1.6 (`prefix = "foundation"` in `infra/terrafo
 
 ## 1.6 Foundation Terraform
 
-**Creates:** VPC, private GKE (Gateway API + Managed Prometheus), 3 Artifact Registry repos (`boutique-dev`, `boutique-stage`, `boutique-prod`), Cloud DNS zone, gateway static IP, KMS etcd encryption, Binary Authorization attestor.
+**Creates:** VPC, Cloud NAT (egress for private GKE nodes), private GKE (Gateway API + Managed Prometheus), 3 Artifact Registry repos (`boutique-dev`, `boutique-stage`, `boutique-prod`), Cloud DNS zone, **Certificate Manager cert map** (`boutique-cert-map`), gateway static IP, KMS etcd encryption, Binary Authorization attestor.
 
 ```bash
 cd ../foundation
@@ -147,7 +148,7 @@ dns_domain    = "biroltilki.art."  # your domain — trailing dot required
 | `dns_domain` | `biroltilki.art.` | Public DNS name served by Cloud DNS |
 | `dns_zone_name` | `biroltilki-art` | Internal GCP name for the managed zone (not visible to users) |
 
-App hostnames used later in GitOps (Phase 2): `dev.biroltilki.art`, `stage.biroltilki.art`, `biroltilki.art` (prod).
+App hostnames used later in GitOps (Phase 2): `argocd.biroltilki.art`, `dev.biroltilki.art`, `stage.biroltilki.art`, `biroltilki.art` (prod).
 
 **Recommended:** restrict GKE control plane to your IP (or a small list if your ISP rotates addresses):
 
@@ -224,9 +225,12 @@ Create **A records** in the Cloud DNS zone pointing to `gateway_ip` from Terrafo
 
 | Record name | Type | Value |
 |-------------|------|--------|
-| `dev` | A | `terraform output -raw gateway_ip` |
+| `argocd` | A | `terraform output -raw gateway_ip` |
+| `dev` | A | same gateway IP |
 | `stage` | A | same gateway IP |
 | `@` (apex) | A | same gateway IP |
+
+Hostnames used in this repo: `argocd.biroltilki.art` (Argo CD UI), `dev.biroltilki.art`, `stage.biroltilki.art`, `biroltilki.art` (prod).
 
 In the Console: open the managed zone → **Add record set**. Or use `gcloud dns record-sets create`.
 

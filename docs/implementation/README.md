@@ -89,6 +89,7 @@ Phase 3 — GitHub Actions
 
 Phase 4 — Argo CD
   □ Argo CD installed
+  □ https://argocd.biroltilki.art reachable (DNS + cert map + HTTPRoute)
   □ bootstrap manifests applied
   □ Applications healthy in Argo UI
 
@@ -112,5 +113,5 @@ Phase 6 — Promotion
 | GitHub org/user | `biroltilki` | bootstrap `github_org`, GitOps `repoURL` |
 | Repo name | `Microservices-Google` | bootstrap `github_repo` |
 | Google Cloud Storage (GCS) state bucket | `tfstate-boutique-unique-2026` | bootstrap backend (globally unique) |
-| Domain (optional) | `biroltilki.art` | Cloud DNS zone, Gateway, frontend host |
+| Domain (optional) | `biroltilki.art` | Cloud DNS zone, Gateway, app hosts (`argocd`, `dev`, `stage`, apex) |
 | Your public IPv4 | from `curl -4 ifconfig.me` | GKE `master_authorized_networks` (add multiple `/32` if IP rotates) |
