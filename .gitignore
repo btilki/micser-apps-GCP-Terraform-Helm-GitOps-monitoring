@@ -25,3 +25,8 @@ cosign.key
 # Build artifacts
 dist/
 bin/
+
+# CI ephemeral files
+.cache/
+gha-creds-*.json
+sbom-*.json

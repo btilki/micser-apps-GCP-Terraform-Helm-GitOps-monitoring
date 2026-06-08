@@ -68,6 +68,8 @@ jobs:
 
       - name: Trivy scan
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_CACHE_DIR: /tmp/trivy
         with:
           image-ref: "${{ steps.meta.outputs.image }}:${{ github.sha }}"
           format: table
@@ -115,6 +117,8 @@ jobs:
           branch: "ci/${{ inputs.service }}-${{ github.sha }}"
           title: "ci(${{ inputs.service }}): deploy digest to dev"
           commit-message: "ci(${{ inputs.service }}): update dev digest"
+          add-paths: |
+            gitops/envs/dev/values-${{ inputs.service }}.yaml
           body: |
             Automated CI update for `${{ inputs.service }}`.
             Digest: `${{ steps.push.outputs.digest }}`
