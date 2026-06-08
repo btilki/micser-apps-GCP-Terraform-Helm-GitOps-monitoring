@@ -92,11 +92,15 @@ jobs:
       - uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
 
       - name: Sign image
-        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' }}
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-        run: cosign sign --yes "${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}"
+        run: |
+          if [ -z "${COSIGN_PRIVATE_KEY}" ]; then
+            echo "COSIGN_PRIVATE_KEY not set — skipping image signing"
+            exit 0
+          fi
+          cosign sign --yes "${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}"
 
       - name: Create Binary Authorization attestation
         run: |
