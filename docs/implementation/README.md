@@ -11,8 +11,9 @@ Follow these phases **in order** to deploy the platform yourself. Each phase has
 | 4 | [phase-04-argocd-and-platform.md](phase-04-argocd-and-platform.md) | Install Argo CD; sync Gateway, policies, workloads |
 | 5 | [phase-05-first-service.md](phase-05-first-service.md) | Deploy `frontend` to `dev`; smoke test |
 | 6 | [phase-06-promotion.md](phase-06-promotion.md) | Promote images dev → stage → prod |
+| 7 | [phase-07-teardown.md](phase-07-teardown.md) | Tear down workloads, cluster, and GCP resources |
 
-**Teardown:** [../cost/teardown.md](../cost/teardown.md)
+**Teardown (quick):** [../cost/teardown.md](../cost/teardown.md) — links to Phase 7 for full steps.
 
 ---
 
@@ -100,6 +101,12 @@ Phase 5 — First service
 Phase 6 — Promotion
   □ promote workflow dev → stage
   □ promote workflow stage → prod (manual Argo sync for prod)
+
+Phase 7 — Teardown (when lab is finished)
+  □ Workloads and Gateway resources removed from cluster
+  □ foundation terraform destroy
+  □ bootstrap terraform destroy (optional)
+  □ Billing verified at zero
 ```
 
 ---

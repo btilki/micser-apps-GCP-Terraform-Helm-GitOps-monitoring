@@ -2,7 +2,8 @@
 
 Promote immutable images by digest across Artifact Registry repos and GitOps environments.
 
-**Previous:** [phase-05-first-service.md](phase-05-first-service.md)
+**Previous:** [phase-05-first-service.md](phase-05-first-service.md)  
+**Next:** [phase-07-teardown.md](phase-07-teardown.md)
 
 ---
 

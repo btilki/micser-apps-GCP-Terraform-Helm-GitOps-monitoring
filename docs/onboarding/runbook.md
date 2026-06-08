@@ -13,6 +13,7 @@ Full step-by-step instructions: **[docs/implementation/README.md](../implementat
 | 4 — Argo CD & platform | [phase-04-argocd-and-platform.md](../implementation/phase-04-argocd-and-platform.md) |
 | 5 — First service | [phase-05-first-service.md](../implementation/phase-05-first-service.md) |
 | 6 — Promotion | [phase-06-promotion.md](../implementation/phase-06-promotion.md) |
+| 7 — Teardown | [phase-07-teardown.md](../implementation/phase-07-teardown.md) |
 
 ## Local prerequisites
 
@@ -48,4 +49,4 @@ After `terraform apply`: `terraform output dns_name_servers` → set those four 
 
 ## Teardown
 
-[docs/cost/teardown.md](../cost/teardown.md)
+Full steps: [phase-07-teardown.md](../implementation/phase-07-teardown.md). Quick commands: [cost/teardown.md](../cost/teardown.md).
