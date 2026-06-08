@@ -47,12 +47,10 @@ spec:
         syncOptions:
           - CreateNamespace=true
   templatePatch: |
+    {{- if eq .autoSync "true" }}
     spec:
       syncPolicy:
-        syncOptions:
-          - CreateNamespace=true
-        {{- if eq .autoSync "true" }}
         automated:
           prune: true
           selfHeal: true
-        {{- end }}
+    {{- end }}
