@@ -19,6 +19,8 @@ The boutique app needs backing services. Sync or ensure these run in `dev` **bef
 
 In Argo CD you can sync all `*-dev` apps, or rely on ApplicationSet auto-sync for dev.
 
+The same order applies when promoting to **stage** or **prod** — see [phase-06 §6.2](phase-06-promotion.md#62-promote-to-stage).
+
 ---
 
 ## 5.2 Build and GitOps all dev services

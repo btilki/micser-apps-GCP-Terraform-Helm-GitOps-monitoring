@@ -1,5 +1,13 @@
 env: stage
 
 image:
-  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-stage/currencyservice
-  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  repository: europe-west1-docker.pkg.dev/msgb-bt-7-2026/boutique-stage/currencyservice
+  digest: "sha256:2dbcbefcc2d6bb80926ea6a5152d9f31dfead8c769c6db280c133e48204957e9"
+
+containerSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]

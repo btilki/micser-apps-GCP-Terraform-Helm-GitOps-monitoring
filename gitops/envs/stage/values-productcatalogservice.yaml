@@ -1,5 +1,13 @@
 env: stage
 
 image:
-  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-stage/productcatalogservice
-  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  repository: europe-west1-docker.pkg.dev/msgb-bt-7-2026/boutique-stage/productcatalogservice
+  digest: "sha256:af00df9b617aed0aececf533800a827b522fbc6daa5d757fca5772b6881f964d"
+
+containerSecurityContext:
+  runAsUser: 65532
+  runAsGroup: 65532
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
