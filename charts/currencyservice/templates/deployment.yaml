@@ -27,6 +27,8 @@ spec:
             - name: grpc
               containerPort: {{ .Values.service.targetPort }}
           env:
+            - name: PORT
+              value: {{ .Values.service.targetPort | quote }}
             {{- range $key, $value := .Values.envVars }}
             - name: {{ $key }}
               value: {{ $value | quote }}
