@@ -22,6 +22,9 @@ resources:
     cpu: 500m
     memory: 256Mi
 
+envVars:
+  DISABLE_PROFILER: "true"
+
 containerSecurityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
