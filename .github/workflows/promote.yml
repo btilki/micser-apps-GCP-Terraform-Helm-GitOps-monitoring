@@ -94,7 +94,7 @@ jobs:
             from `boutique-${{ inputs.source_env }}` to `boutique-${{ inputs.target_env }}`.
 
       - name: Post-promotion notes
-        if: inputs.run_smoke_test != true || inputs.service != 'frontend'
+        if: inputs.run_smoke_test != true
         run: |
           domain="${DNS_DOMAIN%.}"
           if [ "${{ inputs.target_env }}" = "prod" ]; then
