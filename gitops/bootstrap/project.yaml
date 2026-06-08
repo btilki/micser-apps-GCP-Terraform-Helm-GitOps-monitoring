@@ -8,6 +8,8 @@ spec:
   sourceRepos:
     - https://github.com/btilki/micser-apps-GCP-Terraform-Helm-GitOps-monitoring.git
   destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
     - namespace: dev
       server: https://kubernetes.default.svc
     - namespace: stage
