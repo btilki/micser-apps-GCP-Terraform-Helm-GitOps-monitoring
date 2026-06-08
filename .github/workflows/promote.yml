@@ -54,14 +54,21 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a
 
+      - name: Install gcrane
+        run: |
+          curl -fsSL \
+            https://github.com/google/go-containerregistry/releases/download/v0.20.6/go-containerregistry_Linux_x86_64.tar.gz \
+            -o go-containerregistry.tar.gz
+          tar -xzf go-containerregistry.tar.gz gcrane
+          sudo mv gcrane /usr/local/bin/
+
       - name: Copy image between Artifact Registry repos
         run: |
           src="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/boutique-${{ inputs.source_env }}/${{ inputs.service }}"
           dst="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/boutique-${{ inputs.target_env }}/${{ inputs.service }}"
-          gcloud artifacts docker images copy \
+          gcrane cp \
             "${src}@${{ inputs.digest }}" \
-            "${dst}@${{ inputs.digest }}" \
-            --quiet
+            "${dst}@${{ inputs.digest }}"
 
       - name: Patch target GitOps values
         run: |

@@ -10,7 +10,7 @@ Promote immutable images by digest across Artifact Registry repos and GitOps env
 
 ```text
 CI builds once  →  boutique-dev AR
-promote.yml     →  gcloud artifacts docker images copy (by digest)
+promote.yml     →  gcrane cp (by digest; registry-to-registry copy)
 GitOps PR       →  updates gitops/envs/<target>/values-<service>.yaml
 Argo CD         →  syncs target namespace
 ```
@@ -81,6 +81,6 @@ Document known-good digests in your ops notes for rehearsed rollback.
 
 | Problem | Fix |
 |---------|-----|
-| `gcloud artifacts docker images copy` denied | `sa-promote-ci` IAM on source (reader) and target (writer) repos |
+| `gcrane cp` denied (403) | `sa-promote-ci` IAM on source (reader) and target (writer) repos |
 | Prod pod blocked by Binary Authorization | Image needs attestation from CI; check attestor name `boutique-cosign` |
 | Prod sync automatic when it shouldn't | Confirm app is from `boutique-services-prod` (no automated syncPolicy) |

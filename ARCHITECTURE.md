@@ -34,7 +34,7 @@ Extended ADRs: [docs/architecture/design.md](docs/architecture/design.md).
 ## CI/CD flow
 
 1. **CI** (`reusable-service-ci.yml`) — build → syft → Trivy → push dev AR → cosign → attest → GitOps PR.
-2. **Promote** (`promote.yml`) — `gcloud artifacts docker images copy` + PR to stage/prod values.
+2. **Promote** (`promote.yml`) — `gcrane cp` + PR to stage/prod values.
 3. **Deploy** — Argo CD syncs Helm charts + `gitops/envs/<env>/values-*.yaml`.
 
 ## Differences from sibling repos
