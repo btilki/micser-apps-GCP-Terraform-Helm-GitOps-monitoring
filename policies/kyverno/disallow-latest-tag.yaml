@@ -12,6 +12,10 @@ spec:
           - resources:
               kinds:
                 - Pod
+              namespaces:
+                - dev
+                - stage
+                - prod
       validate:
         message: "Using ':latest' image tag is not allowed."
         pattern:

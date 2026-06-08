@@ -211,6 +211,8 @@ Cluster policies in `policies/kyverno/` require the **Kyverno admission controll
 kubectl apply -f policies/kyverno/   # after replacing REGION and PROJECT_ID
 ```
 
+Policies apply only to **`dev`**, **`stage`**, and **`prod`** — not `argocd`, `kyverno`, `kube-system`, or `platform`.
+
 Until Kyverno is installed, policy Applications may show **OutOfSync** — expected.
 
 ---
