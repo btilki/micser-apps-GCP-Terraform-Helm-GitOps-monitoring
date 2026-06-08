@@ -4,6 +4,8 @@ metadata:
   name: boutique-services
   namespace: argocd
 spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
   generators:
     - matrix:
         generators:
@@ -29,28 +31,25 @@ spec:
                   chart: charts/redis-cart
   template:
     metadata:
-      name: "{{service}}-{{env}}"
+      name: "{{.service}}-{{.env}}"
     spec:
       project: boutique-platform
       source:
         repoURL: https://github.com/btilki/micser-apps-GCP-Terraform-Helm-GitOps-monitoring.git
         targetRevision: main
-        path: "{{chart}}"
+        path: "{{.chart}}"
         helm:
-          releaseName: "{{service}}"
+          releaseName: "{{.service}}"
           valueFiles:
-            - ../../gitops/envs/{{env}}/values-{{service}}.yaml
+            - ../../gitops/envs/{{.env}}/values-{{.service}}.yaml
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{env}}"
+        namespace: "{{.env}}"
       syncPolicy:
         syncOptions:
           - CreateNamespace=true
-  templatePatch: |
-    {{- if eq .autoSync "true" }}
-    spec:
-      syncPolicy:
+        {{- if eq .autoSync "true" }}
         automated:
           prune: true
           selfHeal: true
-    {{- end }}
+        {{- end }}
