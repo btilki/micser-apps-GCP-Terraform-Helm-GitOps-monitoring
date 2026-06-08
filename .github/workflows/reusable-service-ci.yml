@@ -71,6 +71,7 @@ jobs:
         env:
           TRIVY_CACHE_DIR: /tmp/trivy
         with:
+          version: v0.71.0
           image-ref: "${{ steps.meta.outputs.image }}:${{ github.sha }}"
           format: table
           severity: HIGH,CRITICAL
