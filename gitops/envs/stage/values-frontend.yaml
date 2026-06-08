@@ -1,8 +1,8 @@
 env: stage
 
 image:
-  repository: REGION-docker.pkg.dev/PROJECT_ID/boutique-stage/frontend
-  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  repository: europe-west1-docker.pkg.dev/msgb-bt-7-2026/boutique-stage/frontend
+  digest: "sha256:359f2bb111a200c3f8b974222911ba82ac0e5364faaecc8f7fa2db382b2d6016"
 
 gateway:
   host: stage.biroltilki.art
