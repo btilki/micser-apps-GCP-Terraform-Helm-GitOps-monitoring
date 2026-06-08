@@ -106,6 +106,7 @@ Document known-good digests in your ops notes for rehearsed rollback.
 | Problem | Fix |
 |---------|-----|
 | Stage smoke test 503 / frontend HTTP 500 | Promote all backing services first; check `kubectl get pods -n stage` and frontend logs for `lookup currencyservice` DNS errors |
+| Stage DNS timeout after pods Running | Ensure `allow-dns` and `allow-same-namespace` NetworkPolicies exist in `stage` (see `gitops/platform/networkpolicy-baseline.yaml`) |
 | `gcrane cp` denied (403) | `sa-promote-ci` IAM on source (reader) and target (writer) repos |
 | Prod pod blocked by Binary Authorization | Image needs attestation from CI; check attestor name `boutique-cosign` |
 | Prod sync automatic when it shouldn't | Confirm app is from `boutique-services-prod` (no automated syncPolicy) |
