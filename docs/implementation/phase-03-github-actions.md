@@ -58,9 +58,28 @@ You can manage infrastructure entirely from your laptop (`terraform apply`) and 
 
 ---
 
-## 3.4 Run first service CI (`frontend`)
+## 3.4 Enable PR creation from Actions (one-time)
 
-**Prerequisite:** Phase 1 foundation applied (Artifact Registry `boutique-dev` exists).
+Service CI opens a GitOps pull request at the end of each run (`peter-evans/create-pull-request`). By default, the `GITHUB_TOKEN` cannot create PRs until you enable this at the repository level.
+
+**Settings → Actions → General** → scroll to **Workflow permissions**:
+
+1. Select **Read and write permissions**
+2. Check **Allow GitHub Actions to create and approve pull requests**
+3. Click **Save**
+
+The workflows already declare `contents: write` and `pull-requests: write`; this repo setting is still required or the **Open GitOps PR** step fails with:
+
+`GitHub Actions is not permitted to create or approve pull requests`
+
+---
+
+## 3.5 Run first service CI (`frontend`)
+
+**Prerequisites:**
+
+- Phase 1 foundation applied (Artifact Registry `boutique-dev` exists)
+- [§3.4](#34-enable-pr-creation-from-actions-one-time) workflow PR setting enabled
 
 1. **Actions** → **CI frontend** → **Run workflow**.
 2. Watch the job steps:
@@ -78,7 +97,7 @@ Repeat for other services when ready (`CI cartservice`, etc.).
 
 ---
 
-## 3.5 What CI does *not* do
+## 3.6 What CI does *not* do
 
 - CI does **not** `kubectl apply` to the cluster.
 - CI does **not** deploy to stage/prod directly — use [phase-06-promotion.md](phase-06-promotion.md).
@@ -90,6 +109,7 @@ Repeat for other services when ready (`CI cartservice`, etc.).
 
 ```text
 □ Terraform workflow plan succeeds on GitHub
+□ Workflow permissions: read/write + allow Actions to create PRs (§3.4)
 □ CI frontend workflow completes (or Trivy issues understood/fixed)
 □ GitOps PR for dev/values-frontend.yaml merged
 □ Image visible in Artifact Registry console (boutique-dev/frontend)
@@ -104,5 +124,5 @@ Repeat for other services when ready (`CI cartservice`, etc.).
 | `google-github-actions/auth` failed | Check `GCP_WIF_PROVIDER` and SA email secrets; repo name matches bootstrap |
 | `denied: Permission "artifactregistry.repositories.uploadArtifacts"` | `sa-build-ci` needs writer on `boutique-dev` (foundation IAM) |
 | Trivy blocks build | Fix CVEs in base image or Dockerfile; or temporarily adjust severity while learning |
-| No PR created | Check `contents: write` and `pull-requests: write` permissions on workflow |
+| No PR created / `not permitted to create or approve pull requests` | Enable [§3.4](#34-enable-pr-creation-from-actions-one-time); workflows already set `contents: write` and `pull-requests: write` |
 | `docker build` timeout | .NET/Go builds can be slow on free runners — re-run or use larger runner |
