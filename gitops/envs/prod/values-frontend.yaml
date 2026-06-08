@@ -5,6 +5,6 @@ image:
   digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
 
 gateway:
-  host: boutique.example.com
+  host: biroltilki.art
 
 replicaCount: 3

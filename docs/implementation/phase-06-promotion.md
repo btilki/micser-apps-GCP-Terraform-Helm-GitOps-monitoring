@@ -31,7 +31,8 @@ Argo CD         →  syncs target namespace
    - `digest`: `sha256:...`
 3. Merge the promotion PR.
 4. Argo syncs `frontend-stage` (automated).
-5. Smoke test: `https://stage.boutique.example.com` (when DNS exists).
+5. After merge and Argo sync, smoke test: `bash scripts/smoke.sh https://stage.biroltilki.art`
+   (or re-run **Promote image** with `run_smoke_test: true` once stage is live).
 
 Repeat for other services.
 

@@ -31,6 +31,11 @@ on:
         description: Image digest (sha256:...)
         required: true
         type: string
+      run_smoke_test:
+        description: Smoke test frontend URL (enable only after PR merge + Argo sync)
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -44,6 +49,7 @@ jobs:
     env:
       GCP_REGION: ${{ vars.GCP_REGION || 'europe-west1' }}
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      DNS_DOMAIN: ${{ vars.DNS_DOMAIN || 'biroltilki.art' }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
@@ -87,10 +93,28 @@ jobs:
             Promoted `${{ inputs.service }}` digest `${{ inputs.digest }}`
             from `boutique-${{ inputs.source_env }}` to `boutique-${{ inputs.target_env }}`.
 
-      - name: Smoke test
+      - name: Post-promotion notes
+        if: inputs.run_smoke_test != true || inputs.service != 'frontend'
         run: |
-          host="${{ inputs.target_env }}.boutique.example.com"
-          if [ "${{ inputs.target_env }}" = "prod" ]; then host="boutique.example.com"; fi
-          if [ "${{ inputs.service }}" = "frontend" ]; then
-            bash scripts/smoke.sh "https://${host}"
+          domain="${DNS_DOMAIN%.}"
+          if [ "${{ inputs.target_env }}" = "prod" ]; then
+            host="${domain}"
+          else
+            host="${{ inputs.target_env }}.${domain}"
           fi
+          echo "Promotion PR opened. Merge it, wait for Argo CD to sync, then verify:"
+          echo "  bash scripts/smoke.sh https://${host}"
+
+      - name: Smoke test frontend
+        if: inputs.run_smoke_test == true && inputs.service == 'frontend'
+        env:
+          SMOKE_ATTEMPTS: 18
+          SMOKE_SLEEP: 20
+        run: |
+          domain="${DNS_DOMAIN%.}"
+          if [ "${{ inputs.target_env }}" = "prod" ]; then
+            host="${domain}"
+          else
+            host="${{ inputs.target_env }}.${domain}"
+          fi
+          bash scripts/smoke.sh "https://${host}"

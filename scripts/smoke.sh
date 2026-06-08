@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-URL="${1:-https://dev.boutique.example.com}"
+URL="${1:-https://dev.biroltilki.art}"
 MAX_ATTEMPTS="${SMOKE_ATTEMPTS:-12}"
 SLEEP_SEC="${SMOKE_SLEEP:-10}"
 
