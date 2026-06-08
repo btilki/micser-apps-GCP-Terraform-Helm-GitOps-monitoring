@@ -6,15 +6,9 @@ on:
       service:
         required: true
         type: string
-    secrets:
-      GCP_WIF_PROVIDER:
-        required: true
-      GCP_BUILD_SA:
-        required: true
-      COSIGN_PRIVATE_KEY:
-        required: false
-      COSIGN_PASSWORD:
-        required: false
+    # Secrets are inherited from the caller (see ci-*.yml). Do not declare
+    # workflow_call secrets here when the job uses `environment:` — that
+    # combination triggers "required but not provided while calling" errors.
 
 permissions:
   contents: write
@@ -97,7 +91,7 @@ jobs:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
           if [ -z "${COSIGN_PRIVATE_KEY}" ]; then
-            echo "COSIGN_PRIVATE_KEY not set — skipping image signing"
+            echo "COSIGN_PRIVATE_KEY not set - skipping image signing"
             exit 0
           fi
           cosign sign --yes "${{ steps.meta.outputs.image }}@${{ steps.push.outputs.digest }}"
