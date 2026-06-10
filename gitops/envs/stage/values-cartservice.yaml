@@ -1,0 +1,5 @@
+env: stage
+
+image:
+  repository: YOUR_REGION-docker.pkg.dev/YOUR_PROJECT_ID/boutique-stage/cartservice
+  digest: "sha256:5c6050d4dc5cb95fad4b6d86cabeab0456a28403dfdc15760dbebe911488aad0"

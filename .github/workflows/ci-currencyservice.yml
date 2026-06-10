@@ -1,0 +1,23 @@
+name: CI currencyservice
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/currencyservice/**"
+      - "charts/currencyservice/**"
+      - ".github/workflows/reusable-service-ci.yml"
+      - ".github/workflows/ci-currencyservice.yml"
+
+jobs:
+  ci:
+    uses: ./.github/workflows/reusable-service-ci.yml
+    with:
+      service: currencyservice
+    secrets: inherit

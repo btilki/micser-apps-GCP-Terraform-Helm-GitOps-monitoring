@@ -1,0 +1,5 @@
+# Trivy scans upstream terraform-google-modules source without evaluating our wrapper inputs.
+# master_authorized_networks is set in envs/foundation/terraform.tfvars.
+# node_metadata defaults to GKE_METADATA in the private-cluster module (~> 35.0).
+AVD-GCP-0061
+AVD-GCP-0057

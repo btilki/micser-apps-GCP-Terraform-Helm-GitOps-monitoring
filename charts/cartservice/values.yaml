@@ -1,0 +1,32 @@
+replicaCount: 2
+env: dev
+
+image:
+  repository: YOUR_REGION-docker.pkg.dev/YOUR_PROJECT_ID/boutique-dev/cartservice
+  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+
+service:
+  port: 7070
+  targetPort: 7070
+
+envVars:
+  REDIS_ADDR: redis-cart:6379
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]

@@ -1,0 +1,27 @@
+env: dev
+
+image:
+  repository: YOUR_REGION-docker.pkg.dev/YOUR_PROJECT_ID/boutique-dev/frontend
+  digest: "sha256:359f2bb111a200c3f8b974222911ba82ac0e5364faaecc8f7fa2db382b2d6016"
+
+containerSecurityContext:
+  runAsUser: 65532
+  runAsGroup: 65532
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+gateway:
+  host: dev.boutique.example.com
+
+envVars:
+  PRODUCT_CATALOG_SERVICE_ADDR: productcatalogservice:3550
+  CURRENCY_SERVICE_ADDR: currencyservice:7000
+  CART_SERVICE_ADDR: cartservice:7070
+  RECOMMENDATION_SERVICE_ADDR: productcatalogservice:3550
+  CHECKOUT_SERVICE_ADDR: cartservice:7070
+  SHIPPING_SERVICE_ADDR: cartservice:7070
+  AD_SERVICE_ADDR: productcatalogservice:3550
+  SHOPPING_ASSISTANT_SERVICE_ADDR: productcatalogservice:3550
+  ENV_PLATFORM: gcp

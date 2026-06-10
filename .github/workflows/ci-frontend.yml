@@ -1,0 +1,23 @@
+name: CI frontend
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/frontend/**"
+      - "charts/frontend/**"
+      - ".github/workflows/reusable-service-ci.yml"
+      - ".github/workflows/ci-frontend.yml"
+
+jobs:
+  ci:
+    uses: ./.github/workflows/reusable-service-ci.yml
+    with:
+      service: frontend
+    secrets: inherit

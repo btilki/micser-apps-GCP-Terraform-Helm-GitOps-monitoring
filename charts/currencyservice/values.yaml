@@ -1,0 +1,32 @@
+replicaCount: 2
+env: dev
+
+image:
+  repository: YOUR_REGION-docker.pkg.dev/YOUR_PROJECT_ID/boutique-dev/currencyservice
+  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+
+service:
+  port: 7000
+  targetPort: 7000
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+envVars:
+  DISABLE_PROFILER: "true"
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]

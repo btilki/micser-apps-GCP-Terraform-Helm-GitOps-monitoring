@@ -1,0 +1,36 @@
+# Expose Argo CD at https://argocd.boutique.example.com via boutique-gateway.
+# Apply after Argo CD install and server.insecure patch (see phase-04 §4.3).
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-platform-gateway-to-argocd
+  namespace: argocd
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: argocd
+  to:
+    - group: ""
+      kind: Service
+      name: argocd-server
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  parentRefs:
+    - name: boutique-gateway
+      namespace: platform
+  hostnames:
+    - argocd.boutique.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: argocd-server
+          port: 80

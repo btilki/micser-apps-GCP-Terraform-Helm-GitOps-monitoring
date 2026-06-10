@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: boutique-platform
+  namespace: argocd
+spec:
+  description: Online Boutique platform and workloads on GKE
+  sourceRepos:
+    - https://github.com/YOUR_GITHUB_ORG/micser-apps-GCP-Terraform-Helm-GitOps-monitoring.git
+  destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
+    - namespace: dev
+      server: https://kubernetes.default.svc
+    - namespace: stage
+      server: https://kubernetes.default.svc
+    - namespace: prod
+      server: https://kubernetes.default.svc
+    - namespace: platform
+      server: https://kubernetes.default.svc
+    - namespace: kyverno
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+    - group: gateway.networking.k8s.io
+      kind: GatewayClass
+    - group: kyverno.io
+      kind: ClusterPolicy
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

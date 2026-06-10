@@ -1,0 +1,5 @@
+apiVersion: v2
+name: lib
+description: Shared Helm library chart for Online Boutique on GCP
+type: library
+version: 0.1.0

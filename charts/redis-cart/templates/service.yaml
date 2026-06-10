@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "boutique.fullname" . }}
+  labels:
+    {{- include "boutique.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "boutique.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: redis
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}

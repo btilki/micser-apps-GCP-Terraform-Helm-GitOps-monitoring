@@ -1,0 +1,15 @@
+env: prod
+
+image:
+  repository: YOUR_REGION-docker.pkg.dev/YOUR_PROJECT_ID/boutique-prod/productcatalogservice
+  digest: "sha256:af00df9b617aed0aececf533800a827b522fbc6daa5d757fca5772b6881f964d"
+
+replicaCount: 3
+
+containerSecurityContext:
+  runAsUser: 65532
+  runAsGroup: 65532
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]

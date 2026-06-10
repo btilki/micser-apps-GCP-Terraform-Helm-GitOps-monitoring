@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "boutique.fullname" . }}
+  labels:
+    {{- include "boutique.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "boutique.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "boutique.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "boutique.serviceAccountName" . }}
+      securityContext:
+        {{- include "boutique.podSecurityContext" . | nindent 8 }}
+      containers:
+        - name: productcatalogservice
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          image: {{ include "boutique.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.service.targetPort }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

@@ -1,0 +1,120 @@
+name: Promote image
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service name
+        required: true
+        type: choice
+        options:
+          - frontend
+          - cartservice
+          - currencyservice
+          - productcatalogservice
+          - redis-cart
+      source_env:
+        description: Source environment (AR repo suffix)
+        required: true
+        type: choice
+        options:
+          - dev
+          - stage
+      target_env:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - stage
+          - prod
+      digest:
+        description: Image digest (sha256:...)
+        required: true
+        type: string
+      run_smoke_test:
+        description: Smoke test frontend URL (enable only after PR merge + Argo sync)
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_env == 'prod' && 'prod' || 'stage' }}
+    env:
+      GCP_REGION: ${{ vars.GCP_REGION || 'europe-west1' }}
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      DNS_DOMAIN: ${{ vars.DNS_DOMAIN || 'boutique.example.com' }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_PROMOTE_SA }}
+
+      - uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a
+
+      - name: Install gcrane
+        run: |
+          curl -fsSL \
+            https://github.com/google/go-containerregistry/releases/download/v0.20.6/go-containerregistry_Linux_x86_64.tar.gz \
+            -o go-containerregistry.tar.gz
+          tar -xzf go-containerregistry.tar.gz gcrane
+          sudo mv gcrane /usr/local/bin/
+
+      - name: Copy image between Artifact Registry repos
+        run: |
+          src="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/boutique-${{ inputs.source_env }}/${{ inputs.service }}"
+          dst="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/boutique-${{ inputs.target_env }}/${{ inputs.service }}"
+          gcrane cp \
+            "${src}@${{ inputs.digest }}" \
+            "${dst}@${{ inputs.digest }}"
+
+      - name: Patch target GitOps values
+        run: |
+          file="gitops/envs/${{ inputs.target_env }}/values-${{ inputs.service }}.yaml"
+          sed -i "s|digest:.*|digest: \"${{ inputs.digest }}\"|" "$file"
+          sed -i "s|boutique-${{ inputs.source_env }}|boutique-${{ inputs.target_env }}|g" "$file"
+          sed -i "s|REGION-docker.pkg.dev/PROJECT_ID|${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}|g" "$file"
+
+      - name: Open promotion PR
+        uses: peter-evans/create-pull-request@67ccf781d68cd99b580ae25a5c18a1cc84ffff1f
+        with:
+          branch: "promote/${{ inputs.service }}-${{ inputs.target_env }}-${{ github.run_id }}"
+          title: "promote(${{ inputs.service }}): ${{ inputs.source_env }} → ${{ inputs.target_env }}"
+          commit-message: "promote(${{ inputs.service }}): update ${{ inputs.target_env }} digest"
+          body: |
+            Promoted `${{ inputs.service }}` digest `${{ inputs.digest }}`
+            from `boutique-${{ inputs.source_env }}` to `boutique-${{ inputs.target_env }}`.
+
+      - name: Post-promotion notes
+        if: inputs.run_smoke_test != true
+        run: |
+          domain="${DNS_DOMAIN%.}"
+          if [ "${{ inputs.target_env }}" = "prod" ]; then
+            host="${domain}"
+          else
+            host="${{ inputs.target_env }}.${domain}"
+          fi
+          echo "Promotion PR opened. Merge it, wait for Argo CD to sync, then verify:"
+          echo "  bash scripts/smoke.sh https://${host}"
+
+      - name: Smoke test frontend
+        if: inputs.run_smoke_test == true && inputs.service == 'frontend'
+        env:
+          SMOKE_ATTEMPTS: 18
+          SMOKE_SLEEP: 20
+        run: |
+          domain="${DNS_DOMAIN%.}"
+          if [ "${{ inputs.target_env }}" = "prod" ]; then
+            host="${domain}"
+          else
+            host="${{ inputs.target_env }}.${domain}"
+          fi
+          bash scripts/smoke.sh "https://${host}"

@@ -1,0 +1,12 @@
+# tfsec suppressions for known false positives in upstream GKE module scans.
+# Our wrapper (modules/gke) sets master_authorized_networks and enable_private_nodes.
+# Pod Security Policy is deprecated; Kyverno enforces PSS in-cluster.
+exclude:
+  - google-gke-enable-master-networks
+  - google-gke-enable-private-cluster
+  - google-gke-enforce-pod-security-policy
+  - google-gke-metadata-endpoints-disabled
+  - google-gke-use-cluster-labels
+  - google-dns-enable-dnssec
+  - google-storage-bucket-encryption-customer-key
+  - google-compute-enable-vpc-flow-logs

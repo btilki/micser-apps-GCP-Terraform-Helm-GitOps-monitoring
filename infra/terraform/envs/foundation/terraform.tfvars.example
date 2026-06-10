@@ -1,0 +1,16 @@
+project_id = "your-gcp-project-id"
+region     = "europe-west1"
+
+build_ci_sa_email   = "sa-build-ci@your-gcp-project-id.iam.gserviceaccount.com"
+promote_ci_sa_email = "sa-promote-ci@your-gcp-project-id.iam.gserviceaccount.com"
+
+dns_zone_name = "boutique-example-com"
+dns_domain    = "boutique.example.com."
+
+# Restrict GKE control plane to your public IP(s). Use IPv4 (/32):
+#   curl -4 ifconfig.me
+# Add multiple entries if your ISP rotates addresses (see phase-01 §1.6).
+master_authorized_networks = [
+  { cidr_block = "203.0.113.10/32", display_name = "home-current" },
+  { cidr_block = "203.0.113.11/32", display_name = "home-old" },
+]

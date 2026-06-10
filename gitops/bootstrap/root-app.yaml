@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: boutique-root
+  namespace: argocd
+spec:
+  project: boutique-platform
+  source:
+    repoURL: https://github.com/YOUR_GITHUB_ORG/micser-apps-GCP-Terraform-Helm-GitOps-monitoring.git
+    targetRevision: main
+    path: gitops/bootstrap/applications
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
