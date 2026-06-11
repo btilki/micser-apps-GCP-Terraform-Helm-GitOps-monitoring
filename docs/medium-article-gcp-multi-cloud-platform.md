@@ -1,6 +1,6 @@
 # I Built the Same Microservices Platform Three Times. GCP Was the Weird One.
 
-*GitHub Actions **does not** `kubectl apply` workloads. Argo CD does. OIDC → WIF replaces long-lived GCP keys.*
+*GitHub Actions **does not** `kubectl apply` workloads — Argo CD does. OIDC → Workload Identity Federation replaces long-lived GCP keys.*
 
 ---
 
@@ -14,7 +14,7 @@ Over the past year I built three sibling repositories around the same idea — r
 | **AWS** | [micser-apps-AWS-Terraform-Helm-GitOps-monitoring](https://github.com/btilki/micser-apps-AWS-Terraform-Helm-GitOps-monitoring) |
 | **Azure** | [micser-apps-Azure-Terraform-Helm-GitOps-monitoring](https://github.com/btilki/micser-apps-Azure-Terraform-Helm-GitOps-monitoring) |
 
-This article focuses on the **GCP** implementation and compares it to the AWS and Azure versions on my GitHub account — same reference architecture, three different product choices.
+This article focuses on the **GCP** implementation and compares it to the AWS and Azure versions in my GitHub repos — same reference architecture, three different product choices.
 
 > *The patterns transfer. The products do not.*
 
@@ -30,7 +30,7 @@ I wanted each repo to demonstrate:
 2. **Immutable deployments** — images pinned by digest, promoted across environments without rebuilding.
 3. **GitOps** — cluster state driven from Git, with prod gated behind review and manual sync.
 4. **Edge HTTPS** on a real hostname.
-5. **Supply-chain and runtime guardrails** appropriate for a portfolio lab that still reads “senior platform engineer.”
+5. **Supply-chain and runtime guardrails** appropriate for a portfolio lab that still reads like senior platform engineering work.
 
 The GCP repo is the most recent iteration. It benefits from lessons learned on AWS and Azure, and it leans into services that only exist (or work best) on Google Cloud.
 
@@ -42,15 +42,20 @@ On AWS I pinned upstream demo images at v0.10.4 in a single Helm chart. On GCP I
 
 The GCP platform is **cost-first**: one project, one **private GKE** cluster, three workload namespaces (`dev`, `stage`, `prod`), plus platform namespaces for Argo CD and shared ingress.
 
-![GCP platform architecture — Online Boutique on GKE](diagrams/infrastructure-diagram.png)
-
-*Use this image as the Medium/LinkedIn hero. Full resolution: [infrastructure-diagram.png](https://github.com/btilki/micser-apps-GCP-Terraform-Helm-GitOps-monitoring/blob/main/docs/diagrams/infrastructure-diagram.png).*
-
 ```text
-GitHub Actions (OIDC → WIF) → Artifact Registry (dev / stage / prod)
-        → Argo CD ApplicationSets → Helm → GKE namespaces
-        → Gateway API + Certificate Manager → HTTPS
-        → Managed Prometheus + Cloud Logging
+GitHub Actions (OIDC → Workload Identity Federation)
+        │
+        ▼
+  Artifact Registry (boutique-dev, boutique-stage, boutique-prod)
+        │
+        ▼
+  Argo CD ApplicationSets → Helm charts → GKE namespaces
+        │
+        ▼
+  Gateway API (global L7) + Certificate Manager → https://*.biroltilki.art
+        │
+        ▼
+  Managed Prometheus + Cloud Logging
 ```
 
 **Bootstrap Terraform** creates the GCS state bucket, WIF pool, and service accounts (`sa-terraform-ci`, `sa-build-ci`, `sa-promote-ci`). **Foundation Terraform** creates the VPC, Cloud NAT, private GKE, three Artifact Registry repos, Cloud DNS, a static gateway IP, KMS encryption for etcd, and a Binary Authorization attestor.
@@ -69,7 +74,7 @@ That split mirrors the AWS and Azure repos: bootstrap trust and state first, the
 
 On AWS I pinned **upstream demo images** in a single Helm chart. On Azure I started from **scaffold build contexts** and per-service charts.
 
-On GCP I vendored the actual microservices-demo source into `apps/` — Go frontend and catalog, .NET cart, Node currency, Redis — and wired **one reusable GitHub Actions workflow** per service. A push to `apps/frontend/` runs the reusable workflow: build, syft SBOM, Trivy scan, push to `boutique-dev`, cosign sign, Binary Authorization attestation, then a GitOps PR updating `gitops/envs/dev/values-frontend.yaml`. Argo CD syncs `frontend-dev` after merge.
+On GCP I vendored the actual microservices-demo source into `apps/` — Go frontend and catalog, .NET cart, Node currency, Redis — and wired **one reusable GitHub Actions workflow** per service. A push to `apps/frontend/` runs the reusable workflow: build, syft SBOM, Trivy scan, push to `boutique-dev`, cosign sign, Binary Authorization attestation, then opens a GitOps PR updating `gitops/envs/dev/values-frontend.yaml`. Argo CD syncs `frontend-dev` after the merge.
 
 ### 2. GitHub Actions + Workload Identity Federation
 
@@ -87,15 +92,15 @@ Azure uses **NGINX Ingress**, cert-manager, and external-dns on Azure DNS — a 
 
 AWS uses **ALB + ACM** via the AWS Load Balancer Controller — solid, but AWS-specific manifest glue.
 
-On GCP I chose **GKE Gateway API** (`gke-l7-global-external-managed`) with a Certificate Manager **cert map** on the Gateway. HTTPRoutes attach per environment (`dev.boutique.example.com`, `stage.boutique.example.com`, apex `boutique.example.com`). One global IP, TLS managed in GCP-native services. **Rejected:** NGINX Ingress (the Azure pattern) — not the GCP-native default. **Trade-off:** you learn Gateway API and cert maps, not Ingress annotations.
+On GCP I chose **GKE Gateway API** (`gke-l7-global-external-managed`) with a Certificate Manager **cert map** on the Gateway. HTTPRoutes attach per environment (`dev.biroltilki.art`, `stage.biroltilki.art`, apex `biroltilki.art`). One global IP, TLS managed in GCP-native services. **Rejected:** NGINX Ingress (the Azure pattern) — not the GCP-native default. **Trade-off:** you learn Gateway API and cert maps, not Ingress annotations.
 
-**Promote and merge backing services before frontend**, or the storefront returns HTTP 500/503 when gRPC upstreams are missing. I hit this on stage: frontend pods were Running, but `lookup currencyservice` timed out because currency and catalog were not promoted yet. Deploy order: redis → catalog → currency → cart → frontend.
+**Promote and merge backing services before the frontend**, or the storefront returns HTTP 500/503 when gRPC upstreams are missing. I hit this in the stage environment: frontend pods were Running, but `lookup currencyservice` timed out because currency and catalog had not been promoted yet. Deploy order: redis → catalog → currency → cart → frontend.
 
 ### 4. Managed observability vs self-hosted Prometheus
 
 Both AWS and Azure deploy **kube-prometheus-stack** (Prometheus, Grafana, Alertmanager) through Argo CD or Helm bootstrap.
 
-On GCP I enabled **GKE Managed Prometheus** and use **Cloud Logging** for log search. That removes a heavy in-cluster monitoring stack and fits the cost-first ADR — at the expense of Grafana dashboards you build yourself in Cloud Console or downstream tools. **Rejected:** self-hosted kube-prometheus-stack on the cluster (the AWS/Azure pattern).
+On GCP I enabled **GKE Managed Prometheus** and configured **Cloud Logging** for log search. That removes a heavy in-cluster monitoring stack and fits the cost-first design — at the expense of Grafana dashboards you must build yourself in Cloud Console or downstream tools. **Rejected:** self-hosted kube-prometheus-stack on the cluster (the AWS/Azure pattern).
 
 ### 5. GitOps shape: ApplicationSet matrix
 
@@ -105,7 +110,7 @@ On GCP I enabled **GKE Managed Prometheus** and use **Cloud Logging** for log se
 | Azure | **App-of-apps** under `gitops/bootstrap/` |
 | **GCP** | **Two ApplicationSets** — auto-sync for dev/stage, manual sync for prod |
 
-The ApplicationSet generates `frontend-dev`, `cartservice-stage`, and so on from an env × service matrix. Prod apps intentionally **do not** auto-sync; promotion merges a PR, then you sync in the Argo CD UI.
+The ApplicationSet generates `frontend-dev`, `cartservice-stage`, and so on from an env × service matrix. Prod apps intentionally **do not** auto-sync; you merge a promotion PR, then sync in the Argo CD UI.
 
 ### 6. Promotion without rebuilding
 
@@ -121,19 +126,19 @@ Build once in dev → copy image by digest → update GitOps values → Argo syn
 | Azure | `az acr import` between dev/stage/prod ACRs |
 | **GCP** | **`gcrane cp`** between Artifact Registry repos (`promote.yml`) |
 
-On GCP, `gcloud artifacts docker images copy` is not available in current SDK releases; `gcrane` is the registry-to-registry path that works. The workflow opens a PR; stage auto-syncs; prod waits for manual Argo sync and optional GitHub Environment approval.
+On GCP, `gcloud artifacts docker images copy` is not available in recent gcloud SDK releases; `gcrane` is the registry-to-registry path that works. The workflow opens a PR; stage auto-syncs; prod waits for manual Argo sync and optional GitHub Environment approval.
 
-- **No rebuild** on promote — same digest, different AR repo.
-- **stage:** auto-sync after PR merge.
-- **prod:** manual Argo Sync + GitHub `prod` environment approval on the promote workflow.
+- **No rebuild on promote** — same digest, different Artifact Registry repo.
+- **`stage`:** auto-sync after PR merge.
+- **`prod`:** manual Argo Sync + GitHub `prod` environment approval on the promote workflow.
 
-A promote copies `frontend` at digest `sha256:abc123…` from `boutique-dev` to `boutique-stage`. The Git diff is a one-line digest change in YAML.
+A promotion copies `frontend` at digest `sha256:abc123…` from `boutique-dev` to `boutique-stage`. The Git diff is a one-line digest change in YAML.
 
 ### 7. Supply chain on GCP
 
 The reusable CI workflow runs **syft** (SBOM), **Trivy** (fail on HIGH/CRITICAL), **cosign** sign, and creates **Binary Authorization** attestations. **Kyverno** enforces digest-only images and registry allowlists at admission time. Of the three siblings, this repo has the deepest supply-chain stack — aligned with GCP’s Binary Authorization model.
 
-> *No rebuild on promote — same digest, different AR repo.*
+> *No rebuild on promote — same digest, different Artifact Registry repo.*
 
 ---
 
@@ -150,12 +155,12 @@ The reusable CI workflow runs **syft** (SBOM), **Trivy** (fail on HIGH/CRITICAL)
 | **Helm layout** | Single `online-boutique` chart | Per-service charts | Library chart + per-service charts |
 | **App images** | Upstream demo digests | Scaffold / build contexts | Full demo source in `apps/` |
 | **GitOps** | Static apps + overlays | App-of-apps | ApplicationSet (env × service) |
-| **Prod deploy** | Manual / gated | Manual Argo sync | Manual Argo sync + GH `prod` env |
+| **Prod deploy** | Manual / gated | Manual Argo sync | Manual Argo sync + GitHub `prod` env |
 | **Notable extras** | IRSA, LBC bootstrap | Key Vault CSI, Helm-first platform | WIF, Binary Auth, Kyverno, gcrane promote |
 
 I also maintain lighter **multi-env IaC** repos ([aws-multi-env-iac](https://github.com/btilki/aws-multi-env-iac), [azure-multi-env-iac](https://github.com/btilki/azure-multi-env-iac)) for Terraform-only foundations. The three `micser-apps-*` repos are the full application + GitOps + observability stacks.
 
-The ingress/TLS row alone shows the point: ALB + ACM on AWS, NGINX + cert-manager on Azure, Gateway API + Certificate Manager on GCP. Same user-facing requirement, three operational models.
+The ingress/TLS row alone shows the point: ALB + ACM on AWS, NGINX + cert-manager on Azure, Gateway API + Certificate Manager on GCP — same user-facing requirement, three operational models.
 
 ---
 
@@ -165,13 +170,13 @@ The ingress/TLS row alone shows the point: ALB + ACM on AWS, NGINX + cert-manage
 |---------|-----|
 | **ImagePullBackOff** | GKE node service accounts need `roles/artifactregistry.reader`. Terraform had granted CI write access; the node pool still could not pull. |
 | **CreateContainerConfigError** | Pod Security `runAsNonRoot: true` without `runAsUser` breaks distroless and Redis images. Dev values needed explicit UIDs (`runAsUser: 65532` on frontend); stage and prod inherited the same overrides. |
-| **Stage 503 / frontend HTTP 500** | Promote backing services before frontend. Check frontend logs for `lookup currencyservice` DNS errors. Order: redis → catalog → currency → cart → frontend. |
-| **Apex HTTPS 404** | Wildcard listener `*.boutique.example.com` does not match apex `boutique.example.com`. Add a second Gateway listener (`https-apex`) and wait for cert propagation. |
-| **Smoke test fails in promote workflow** | `smoke.sh` in `promote.yml` runs before the PR merges and Argo syncs. Run smoke after deploy; keep `run_smoke_test: false` in the workflow until all target apps are synced. |
+| **Stage 503 / frontend HTTP 500** | Promote backing services before the frontend. Check frontend logs for `lookup currencyservice` DNS errors. Order: redis → catalog → currency → cart → frontend. |
+| **Apex HTTPS 404** | Wildcard listener `*.biroltilki.art` does not match apex `biroltilki.art`. Add a second Gateway listener (`https-apex`) and wait for cert propagation. |
+| **Smoke test fails in promote workflow** | `smoke.sh` in `promote.yml` runs before the PR merges and Argo syncs. Run smoke after deploy instead; keep `run_smoke_test: false` in the workflow until all target apps are synced. |
 
-These are documented in the phased implementation guide under `docs/implementation/` — seven phases from Terraform through teardown. Run Phase 7 when the lab is finished; see `docs/cost/teardown.md` for cost notes (~**$110–235/month** for one private GKE cluster).
+These are documented in the phased implementation guide under `docs/implementation/` — seven phases from Terraform through teardown. Run Phase 7 when the lab is finished; see `docs/cost/teardown.md` for cost notes (roughly **$110–235/month** for one private GKE cluster).
 
-> *Wildcard `*.boutique.example.com` does not match the apex.*
+> *Wildcard `*.biroltilki.art` does not match the apex.*
 
 ---
 
