@@ -1,5 +1,4 @@
-# I Built the Same Microservices Platform Three Times. GCP Was the Weird One.
-
+# I Built the Same Kubernetes Platform on AWS, Azure, and GCP. GCP Was the Weird One
 *GitHub Actions **does not** `kubectl apply` workloads — Argo CD does. OIDC → Workload Identity Federation replaces long-lived GCP keys.*
 
 ---
