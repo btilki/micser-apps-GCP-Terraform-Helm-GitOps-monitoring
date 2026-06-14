@@ -51,14 +51,14 @@ jobs:
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
       DNS_DOMAIN: ${{ vars.DNS_DOMAIN || 'boutique.example.com' }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
 
-      - uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093
         with:
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
           service_account: ${{ secrets.GCP_PROMOTE_SA }}
 
-      - uses: google-github-actions/setup-gcloud@77e7a554d41e2ee56fc945c52dfd3f33d12def9a
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db
 
       - name: Install gcrane
         run: |
@@ -84,7 +84,7 @@ jobs:
           sed -i "s|REGION-docker.pkg.dev/PROJECT_ID|${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}|g" "$file"
 
       - name: Open promotion PR
-        uses: peter-evans/create-pull-request@67ccf781d68cd99b580ae25a5c18a1cc84ffff1f
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
           branch: "promote/${{ inputs.service }}-${{ inputs.target_env }}-${{ github.run_id }}"
           title: "promote(${{ inputs.service }}): ${{ inputs.source_env }} → ${{ inputs.target_env }}"
